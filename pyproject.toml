@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "eshet"
+version = "0.0.1"
+requires-python = ">=3.10"
+dependencies = [
+    "msgpack~=1.0"
+]
+
+[project.optional-dependencies]
+test = [
+    "pytest",
+    "pytest-asyncio",
+]
+dev = [
+    "black",
+    "flake8",
+    "flake8-black",
+]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+python_files = "*.py"
