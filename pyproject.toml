@@ -8,7 +8,8 @@ version = "0.0.1"
 description = "ESHET client"
 requires-python = ">=3.10"
 dependencies = [
-    "msgpack~=1.0"
+    "msgpack~=1.0",
+    "sentinel~=1.0",
 ]
 
 [project.optional-dependencies]

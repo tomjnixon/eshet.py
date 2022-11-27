@@ -1,11 +1,28 @@
-from .client import Client
+from .client import Client, Unknown
 import pytest
 import asyncio
+import logging
 
 
 @pytest.fixture
 async def client():
-    c = Client(base="/test_client")
+    c = Client(
+        base="/test_client",
+        logger=logging.getLogger("client"),
+    )
+    await c.wait_for_connection()
+
+    yield c
+
+    await c.close()
+
+
+@pytest.fixture
+async def client2():
+    c = Client(
+        base="/test_client",
+        logger=logging.getLogger("client2"),
+    )
     await c.wait_for_connection()
 
     yield c
@@ -77,3 +94,96 @@ async def test_event_iter(client):
         assert await payloads.get() == payload
 
     await task
+
+
+async def test_state(client):
+    state = await client.state_register("test_state")
+
+    calls = asyncio.Queue()
+    value = await client.state_observe("test_state", calls.put_nowait)
+    assert value is Unknown
+
+    # no initial calls
+    await asyncio.sleep(0.3)
+    assert calls.empty()
+
+    # changes get through
+    await state.changed(5)
+
+    assert (await calls.get()) == 5
+    await asyncio.sleep(0.3)
+    assert calls.empty()
+
+    # another observer
+    calls2 = asyncio.Queue()
+    value = await client.state_observe("test_state", calls2.put_nowait)
+    assert value == 5
+
+    # no initial calls
+    await asyncio.sleep(0.3)
+    assert calls2.empty()
+
+    # set unknown
+    await state.unknown()
+
+    assert (await calls.get()) is Unknown
+    assert (await calls2.get()) is Unknown
+
+    await asyncio.sleep(0.3)
+    assert calls.empty()
+    assert calls2.empty()
+
+
+async def test_state_observe_twice(client):
+    state = await client.state_register("test_state")
+    await state.changed(5)
+
+    async def observe():
+        calls = asyncio.Queue()
+        value = await client.state_observe("test_state", calls.put_nowait)
+        assert value == 5
+
+        await asyncio.sleep(0.3)
+        assert calls.empty()
+
+    t1 = asyncio.create_task(observe())
+    t2 = asyncio.create_task(observe())
+    await t1
+    await t2
+
+
+async def test_state_observe_reconnect(client, client2):
+    state = await client.state_register("test_state")
+    await state.changed(5)
+
+    calls = asyncio.Queue()
+    value = await client2.state_observe("test_state", calls.put_nowait)
+    assert value == 5
+
+    client2.protocol.transport.close()
+
+    assert (await calls.get()) is Unknown
+    assert (await calls.get()) == 5
+
+    await asyncio.sleep(0.3)
+    assert calls.empty()
+
+
+async def test_state_observe_during_reconnect(client, client2):
+    state = await client.state_register("test_state")
+    await state.changed(5)
+
+    client2.protocol.transport.close()
+    await asyncio.sleep(0.5)
+
+    calls = asyncio.Queue()
+    value = await client2.state_observe("test_state", calls.put_nowait)
+    assert value == 5
+
+    client2.protocol.transport.close()
+
+    assert (await calls.get()) is Unknown
+    assert (await calls.get()) == 5
+
+    await asyncio.sleep(0.3)
+    assert calls.empty()
