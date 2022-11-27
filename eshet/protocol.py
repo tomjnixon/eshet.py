@@ -2,6 +2,7 @@ import struct
 from enum import Enum, auto
 import asyncio
 from dataclasses import dataclass
+from typing import Tuple
 from .messages import pack_msg, unpack_msg, ClientMessage, ServerMessage, MessageType
 from .types import ResultType
 from .exceptions import ErrorValue, Disconnected
@@ -186,7 +187,7 @@ class Proto(asyncio.Protocol):
         self.transport.write(struct.pack(header_fmt, sync_word, len(packed)) + packed)
         self.last_send = asyncio.get_running_loop().time()
 
-    def get_id(self) -> (int, asyncio.Future):
+    def get_id(self) -> Tuple[int, asyncio.Future]:
         while self.next_id in self.reply_ids:
             self.next_id = (self.next_id + 1) & 0xFFFF
 
