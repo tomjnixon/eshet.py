@@ -1,5 +1,5 @@
 from enum import Enum, auto
-from typing import Literal, Union
+from typing import Literal, Tuple, Union
 import msgpack
 import struct
 from .types import Result, ResultType, StateValueType, Msgpack, StateValue, ID, Path
@@ -37,7 +37,7 @@ class MessageType(Enum):
 
 EitherMessage = Union[
     tuple[Literal[MessageType.reply], ID, Result],
-    tuple[Literal[MessageType.action_call], ID, Path, Msgpack],
+    tuple[Literal[MessageType.action_call], ID, Path, Tuple[Msgpack, ...]],
 ]
 
 ClientMessage = Union[
