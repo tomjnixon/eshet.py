@@ -5,6 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "eshet"
 version = "0.0.1"
+description = "ESHET client"
 requires-python = ">=3.10"
 dependencies = [
     "msgpack~=1.0"
