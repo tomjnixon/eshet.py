@@ -73,7 +73,7 @@ AnyMessage = Union[ClientMessage, ServerMessage]
 
 
 def pack(obj):
-    return msgpack.packb(obj)
+    return msgpack.packb(obj, use_single_float=True)
 
 
 def pack_path(path):
