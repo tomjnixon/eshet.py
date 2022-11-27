@@ -102,7 +102,10 @@ class Client:
         messages from it
         """
         while True:
-            await self.__connect_once()
+            try:
+                await self.__connect_once()
+            except Exception as e:
+                self.logger.exception("error in connection task")
             await asyncio.sleep(1.0)
 
     async def __connect_once(self):
