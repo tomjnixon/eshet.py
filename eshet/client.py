@@ -171,7 +171,7 @@ class Client:
         return str(self.base / path)
 
     def __check_connected(self):
-        """throw if not connected"""
+        """raise if not connected"""
         if not self.connected:
             raise Disconnected()
 
