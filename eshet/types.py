@@ -18,7 +18,7 @@ Result = tuple[ResultType, Msgpack]
 
 StateValue = Union[
     tuple[Literal[StateValueType.known], Msgpack],
-    Literal[StateValueType.known],
+    Literal[StateValueType.unknown],
 ]
 
 ID = int
