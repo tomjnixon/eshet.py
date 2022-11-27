@@ -147,6 +147,8 @@ class Proto(asyncio.Protocol):
         match msg:
             case (MessageType.reply, reply_id, (ResultType.ok, value)):
                 self.reply_ids.pop(reply_id).set_result(value)
+            case (MessageType.reply_state, reply_id, value):
+                self.reply_ids.pop(reply_id).set_result(value)
             case (MessageType.reply, reply_id, (ResultType.error, value)):
                 self.reply_ids.pop(reply_id).set_exception(ErrorValue(value))
             case _:
