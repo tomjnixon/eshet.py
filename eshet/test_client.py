@@ -187,3 +187,21 @@ async def test_state_observe_during_reconnect(client, client2):
 
     await asyncio.sleep(0.3)
     assert calls.empty()
+
+
+async def test_state_get(client):
+    state = await client.state_register("test_state")
+    await state.changed(5)
+
+    assert (await client.get("test_state")) == 5
+
+
+async def test_state_set(client, client2):
+    calls = asyncio.Queue()
+    state = await client.state_register("test_state", calls.put_nowait)
+
+    await client2.set("test_state", 7)
+
+    assert (await calls.get()) == 7
+    await asyncio.sleep(0.3)
+    assert calls.empty()

@@ -68,6 +68,7 @@ class Client:
         self.actions = {}
         self.listens = defaultdict(list)
         self.observes = defaultdict(list)
+        self.states = {}
 
         # current values for registered states, for re-registration
         self.registered_state_values = {}
@@ -179,6 +180,8 @@ class Client:
                     _run_in_task_if_coroutine(cb(value))
             case (MessageType.state_changed, path, known_unknown):
                 self.__state_update(path, known_unknown)
+            case (MessageType.state_set, reply_id, path, value):
+                self.__wrap_call(reply_id, self.states[path], value)
             case _:
                 raise Exception(f"unexpected message: {msg}")
 
@@ -257,6 +260,24 @@ class Client:
         self.protocol.send_message((MessageType.action_call, id, path, args))
         return await future
 
+    # property/state actions
+
+    async def get(self, path):
+        """get a state or property"""
+        path = self.__make_absolute(path)
+        self.__check_connected()
+        id, future = self.protocol.get_id()
+        self.protocol.send_message((MessageType.get, id, path))
+        return await future
+
+    async def set(self, path, value):
+        """set a state or property"""
+        path = self.__make_absolute(path)
+        self.__check_connected()
+        id, future = self.protocol.get_id()
+        self.protocol.send_message((MessageType.set, id, path, value))
+        return await future
+
     # events
 
     async def event_register(self, path):
@@ -307,10 +328,12 @@ class Client:
         async def unknown(self):
             return await self.client.state_unknown(self.path)
 
-    async def state_register(self, path):
+    async def state_register(self, path, set_callback=None):
         """register a state"""
         path = self.__make_absolute(path)
         self.registered_state_values[path] = Unknown
+        if set_callback is not None:
+            self.states[path] = set_callback
         await self.__do_registration(MessageType.state_register, path)
         return self.StateWrapper(self, path)
 

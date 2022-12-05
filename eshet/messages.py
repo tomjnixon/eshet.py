@@ -33,6 +33,7 @@ class MessageType(Enum):
     state_changed = auto()
     state_unknown = auto()
     state_observe = auto()
+    state_set = auto()
 
 
 EitherMessage = Union[
@@ -67,6 +68,7 @@ ServerMessage = Union[
     tuple[Literal[MessageType.prop_set], ID, Path, Msgpack],
     tuple[Literal[MessageType.event_notify], Path, Msgpack],
     tuple[Literal[MessageType.state_changed], Path, StateValue],
+    tuple[Literal[MessageType.state_set], ID, Path, Msgpack],
 ]
 
 AnyMessage = Union[ClientMessage, ServerMessage]
@@ -142,6 +144,8 @@ def pack_msg(msg: AnyMessage):
             return struct.pack(">B", 0x44) + pack_path(path) + pack(state)
         case (MessageType.state_changed, path, StateValueType.unknown):
             return struct.pack(">B", 0x45) + pack_path(path)
+        case (MessageType.state_set, id, path, value):
+            return struct.pack(">BH", 0x47, id) + pack_path(path) + pack(value)
         case _:
             assert False, "unknown message"
 
@@ -241,6 +245,8 @@ def unpack_msg(msg):
                 read_path(),
                 StateValueType.unknown,
             )
+        case 0x47:
+            return (MessageType.state_set, read(">H"), read_path(), read_pack())
         case _:
             raise ValueError("could not parse message")
 
@@ -273,6 +279,7 @@ def test_pack_unpack():
         (MessageType.state_observe, 42, "/path"),
         (MessageType.state_changed, "/path", (StateValueType.known, [b"foo", 5])),
         (MessageType.state_changed, "/path", StateValueType.unknown),
+        (MessageType.state_set, 42, "/path", [b"foo", 5]),
     ]
 
     for message in messages:
