@@ -1,4 +1,5 @@
 from .client import Client, Unknown
+from eshet.exceptions import ErrorValue
 import pytest
 import asyncio
 import logging
@@ -205,3 +206,20 @@ async def test_state_set(client, client2):
     assert (await calls.get()) == 7
     await asyncio.sleep(0.3)
     assert calls.empty()
+
+
+async def test_state_set_error(client, client2):
+    def setter(value):
+        raise ValueError("foo")
+
+    state = await client.state_register("test_state", setter)
+
+    with pytest.raises(ErrorValue, match="foo"):
+        await client2.set("test_state", 7)
+
+
+async def test_state_no_setter_error(client, client2):
+    state = await client.state_register("test_state")
+
+    with pytest.raises(ErrorValue, match="not_implemented"):
+        await client2.set("test_state", 7)

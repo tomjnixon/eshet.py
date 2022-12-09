@@ -181,7 +181,16 @@ class Client:
             case (MessageType.state_changed, path, known_unknown):
                 self.__state_update(path, known_unknown)
             case (MessageType.state_set, reply_id, path, value):
-                self.__wrap_call(reply_id, self.states[path], value)
+                if path in self.states:
+                    self.__wrap_call(reply_id, self.states[path], value)
+                else:
+                    self.protocol.send_message(
+                        (
+                            MessageType.reply,
+                            reply_id,
+                            (ResultType.error, "not_implemented"),
+                        )
+                    )
             case _:
                 raise Exception(f"unexpected message: {msg}")
 
