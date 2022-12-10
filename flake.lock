@@ -17,7 +17,8 @@
     "root": {
       "inputs": {
         "nixpkgs": "nixpkgs",
-        "utils": "utils"
+        "utils": "utils",
+        "yarp_src": "yarp_src"
       }
     },
     "utils": {
@@ -32,6 +33,23 @@
       "original": {
         "owner": "numtide",
         "repo": "flake-utils",
+        "type": "github"
+      }
+    },
+    "yarp_src": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1670373924,
+        "narHash": "sha256-VFilfylVFq0N2fwMBsCPj34VyqfaDdcX3W5b/RtRnRk=",
+        "owner": "tomjnixon",
+        "repo": "yarp",
+        "rev": "772aad33247b85c834e9ed8f1fb48edaba98f714",
+        "type": "github"
+      },
+      "original": {
+        "owner": "tomjnixon",
+        "ref": "time_window",
+        "repo": "yarp",
         "type": "github"
       }
     }
