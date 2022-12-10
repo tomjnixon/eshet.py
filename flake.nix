@@ -9,7 +9,7 @@
   utils.lib.eachSystem utils.lib.defaultSystems (system:
     let
       pkgs = nixpkgs.legacyPackages."${system}";
-      python = pkgs.python310;
+      python = pkgs.python3;
     in rec {
       packages.eshet_py = python.pkgs.buildPythonPackage rec {
         name = "eshet";
