@@ -85,3 +85,38 @@ async def state_register(path, value, client=None, settable=False):
         asyncio.create_task(send(value))
 
     await send(value.value)
+
+
+def contains_novalue_uknonwn(value):
+    """does a value contain NoValue or Unknown somewhere?"""
+    if value is yarp.NoValue:
+        return True
+    elif value is Unknown:
+        return True
+
+    elif isinstance(value, (list, tuple, set)):
+        return any(contains_novalue_uknonwn(v) for v in value)
+    elif isinstance(value, dict):
+        return any(
+            contains_novalue_uknonwn(k) or contains_novalue_uknonwn(v)
+            for k, v in value.items()
+        )
+    else:
+        return False
+
+
+async def action_call(path, *args, client=None):
+    """call an action whenever args does not contain NoValue/Unknown"""
+    if client is None:
+        client = await get_default_eshet_client()
+    args = yarp.ensure_value(args)
+
+    async def run(args_value):
+        if not contains_novalue_uknonwn(args_value):
+            await client.action_call(path, *args_value)
+
+    @args.on_value_changed
+    def cb(args_value):
+        asyncio.create_task(run(args_value))
+
+    cb(args.value)
