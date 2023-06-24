@@ -1,6 +1,6 @@
-import asyncio
 import yarp
 from .client import Client, Unknown
+from .utils import in_task
 
 
 _default_client = None
@@ -80,9 +80,7 @@ async def state_register(path, value, client=None, settable=False):
         else:
             await state.changed(value)
 
-    @value.on_value_changed
-    def cb(value):
-        asyncio.create_task(send(value))
+    value.on_value_changed(in_task(send))
 
     await send(value.value)
 
@@ -111,12 +109,10 @@ async def action_call(path, *args, client=None):
         client = await get_default_eshet_client()
     args = yarp.ensure_value(args)
 
-    async def run(args_value):
+    @args.on_value_changed
+    @in_task
+    async def cb(args_value):
         if not contains_novalue_uknonwn(args_value):
             await client.action_call(path, *args_value)
-
-    @args.on_value_changed
-    def cb(args_value):
-        asyncio.create_task(run(args_value))
 
     cb(args.value)

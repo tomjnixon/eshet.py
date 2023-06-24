@@ -8,6 +8,7 @@ from pathlib import PurePosixPath as Path
 from collections import defaultdict
 from .exceptions import Disconnected
 from .protocol import Proto, TimeoutConfig, ProtoMessage
+from .utils import create_task_in_set
 import logging
 import sentinel
 
@@ -17,11 +18,6 @@ async def _make_awaitable(x):
         return await x
     else:
         return x
-
-
-def _run_in_task_if_coroutine(x):
-    if asyncio.iscoroutine(x):
-        asyncio.create_task(x)
 
 
 # for states; this is a bit easier to work with in python than the
@@ -82,6 +78,8 @@ class Client:
         self.connection_task_handle = asyncio.create_task(
             self.__connection_task(), name="eshet connection"
         )
+
+        self.tasks = set()
 
     async def close(self):
         if self.connection_task_handle is not None:
@@ -177,7 +175,7 @@ class Client:
                 self.__wrap_call(reply_id, self.actions[path], *args)
             case (MessageType.event_notify, path, value):
                 for cb in self.listens[path]:
-                    _run_in_task_if_coroutine(cb(value))
+                    self.__run_in_task_if_coroutine(cb(value))
             case (MessageType.state_changed, path, known_unknown):
                 self.__state_update(path, known_unknown)
             case (MessageType.state_set, reply_id, path, value):
@@ -213,7 +211,7 @@ class Client:
                     (MessageType.reply, reply_id, (ResultType.ok, result))
                 )
 
-        asyncio.create_task(task())
+        create_task_in_set(self.tasks, task())
 
     @property
     def connected(self) -> bool:
@@ -225,6 +223,11 @@ class Client:
         return self.connection_event.wait()
 
     # utilities
+
+    def __run_in_task_if_coroutine(self, x):
+        """if x is a coroutine, run it in a task, saved in self.tasks"""
+        if asyncio.iscoroutine(x):
+            create_task_in_set(self.tasks, x)
 
     def __make_absolute(self, path: str) -> str:
         """get the absolute path for a path relative to base"""
@@ -407,6 +410,6 @@ class Client:
         else:
             self.observed_state_values[path] = value
             for cb in self.observes[path]:
-                _run_in_task_if_coroutine(cb(value))
+                self.__run_in_task_if_coroutine(cb(value))
 
         return value
