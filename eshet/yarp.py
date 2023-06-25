@@ -1,6 +1,6 @@
 import yarp
 from .client import Client, Unknown
-from .utils import in_task
+from .utils import in_task, TaskStrategy, RunInTask
 
 
 _default_client = None
@@ -103,14 +103,19 @@ def contains_novalue_uknonwn(value):
         return False
 
 
-async def action_call(path, *args, client=None):
+async def action_call(
+    path,
+    *args,
+    client=None,
+    strategy: TaskStrategy = RunInTask(),
+):
     """call an action whenever args does not contain NoValue/Unknown"""
     if client is None:
         client = await get_default_eshet_client()
     args = yarp.ensure_value(args)
 
     @args.on_value_changed
-    @in_task
+    @strategy.wrap_fn
     async def cb(args_value):
         if not contains_novalue_uknonwn(args_value):
             await client.action_call(path, *args_value)
