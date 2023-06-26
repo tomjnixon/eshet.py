@@ -16,6 +16,7 @@ dependencies = [
 test = [
     "pytest",
     "pytest-asyncio",
+    "asyncio-time-travel",
 ]
 dev = [
     "black",
