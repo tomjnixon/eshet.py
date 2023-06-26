@@ -31,6 +31,7 @@ async def client2():
     await c.close()
 
 
+@pytest.mark.needs_server
 async def test_action(client):
     await client.action_register("test_action", lambda x: x + 1)
 
@@ -38,6 +39,7 @@ async def test_action(client):
     assert res == 6
 
 
+@pytest.mark.needs_server
 async def test_action_absolute_call(client):
     await client.action_register("test_action", lambda x: x + 1)
 
@@ -45,6 +47,7 @@ async def test_action_absolute_call(client):
     assert res == 6
 
 
+@pytest.mark.needs_server
 async def test_async_action(client):
     async def async_action(x):
         await asyncio.sleep(0)
@@ -55,6 +58,7 @@ async def test_async_action(client):
     assert res == 6
 
 
+@pytest.mark.needs_server
 async def test_event(client):
     event = await client.event_register("test_event")
 
@@ -74,6 +78,7 @@ async def test_event(client):
     assert calls.empty() and async_calls.empty()
 
 
+@pytest.mark.needs_server
 async def test_event_iter(client):
     event = await client.event_register("test_event_iter")
 
@@ -97,6 +102,7 @@ async def test_event_iter(client):
     await task
 
 
+@pytest.mark.needs_server
 async def test_state(client):
     state = await client.state_register("test_state")
 
@@ -135,6 +141,7 @@ async def test_state(client):
     assert calls2.empty()
 
 
+@pytest.mark.needs_server
 async def test_state_observe_twice(client):
     state = await client.state_register("test_state")
     await state.changed(5)
@@ -153,6 +160,7 @@ async def test_state_observe_twice(client):
     await t2
 
 
+@pytest.mark.needs_server
 async def test_state_observe_reconnect(client, client2):
     state = await client.state_register("test_state")
     await state.changed(5)
@@ -170,6 +178,7 @@ async def test_state_observe_reconnect(client, client2):
     assert calls.empty()
 
 
+@pytest.mark.needs_server
 async def test_state_observe_during_reconnect(client, client2):
     state = await client.state_register("test_state")
     await state.changed(5)
@@ -190,6 +199,7 @@ async def test_state_observe_during_reconnect(client, client2):
     assert calls.empty()
 
 
+@pytest.mark.needs_server
 async def test_state_get(client):
     state = await client.state_register("test_state")
     await state.changed(5)
@@ -197,6 +207,7 @@ async def test_state_get(client):
     assert (await client.get("test_state")) == 5
 
 
+@pytest.mark.needs_server
 async def test_state_set(client, client2):
     calls = asyncio.Queue()
     state = await client.state_register("test_state", calls.put_nowait)
@@ -208,6 +219,7 @@ async def test_state_set(client, client2):
     assert calls.empty()
 
 
+@pytest.mark.needs_server
 async def test_state_set_error(client, client2):
     def setter(value):
         raise ValueError("foo")
@@ -218,6 +230,7 @@ async def test_state_set_error(client, client2):
         await client2.set("test_state", 7)
 
 
+@pytest.mark.needs_server
 async def test_state_no_setter_error(client, client2):
     state = await client.state_register("test_state")
 
