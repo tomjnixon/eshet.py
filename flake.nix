@@ -21,7 +21,7 @@
         propagatedBuildInputs = with python.pkgs; [
           sentinel
         ];
-        checkInputs = with python.pkgs; [ pytest pytest-asyncio mock ];
+        nativeCheckInputs = with python.pkgs; [ pytest pytest-asyncio mock ];
         checkPhase = "pytest";
         pythonImportsCheck = [ "yarp" ];
       };
