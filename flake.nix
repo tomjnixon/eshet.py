@@ -39,8 +39,9 @@
 
       packages.eshet_py = python.pkgs.buildPythonPackage rec {
         name = "eshet";
-        format = "flit";
+        format = "pyproject";
         src = ./.;
+        nativeBuildInputs = with python.pkgs; [ setuptools ];
         propagatedBuildInputs = with python.pkgs; [
           msgpack
           sentinel
