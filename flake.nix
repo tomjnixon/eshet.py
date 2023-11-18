@@ -4,7 +4,7 @@
   inputs = {
     utils.url = "github:numtide/flake-utils";
 
-    yarp_src.url = "github:tomjnixon/yarp/time_window";
+    yarp_src.url = "github:tomjnixon/yarp/fn_value";
     yarp_src.flake = false;
   };
 

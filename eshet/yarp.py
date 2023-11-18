@@ -19,20 +19,23 @@ async def get_default_eshet_client():
     return _default_client
 
 
+# objects to keep alive to keep functionality in this module working, mostly
+# yarp objects which would otherwise dangle
+_keep_alive = []
+
+
 async def event_listen(path, client=None):
-    """make an instantaneous Value which is set whenever the given event
-    fires
-    """
+    """make an Event which emits whenever the event at path does"""
     if client is None:
         client = await get_default_eshet_client()
 
-    output_value = yarp.Value()
-    await client.event_listen_cb(path, output_value.set_instantaneous_value)
-    return output_value
+    event = yarp.Event()
+    await client.event_listen_cb(path, event.emit)
+    return event
 
 
 async def state_observe(path, client=None):
-    """make a continuous Value which has the value of the given state
+    """make a Value which has the value of the given state
 
     the value will be set by the time this returns, and will be set to
     client.Unknown if the state is unknown. it will therefore never be NoValue.
@@ -62,6 +65,7 @@ async def state_register(path, value, client=None, settable=False):
     if client is None:
         client = await get_default_eshet_client()
     value = yarp.ensure_value(value)
+    _keep_alive.append(value)
 
     if settable:
 
@@ -112,7 +116,9 @@ async def action_call(
     """call an action whenever args does not contain NoValue/Unknown"""
     if client is None:
         client = await get_default_eshet_client()
+
     args = yarp.ensure_value(args)
+    _keep_alive.append(args)
 
     @args.on_value_changed
     @strategy.wrap_fn
