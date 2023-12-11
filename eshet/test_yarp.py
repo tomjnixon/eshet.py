@@ -96,14 +96,14 @@ async def test_state_register(client, client2, initial_value):
 @pytest.mark.needs_server
 @pytest.mark.parametrize("initial_value", [NoValue, 5])
 async def test_state_register_settable(client, client2, initial_value):
-    v = Value()
+    v = Value(initial_value)
 
     await state_register("test_state3", v, client=client2, settable=True)
     gc.collect()
 
     values = []
     value = await client.state_observe("test_state3", values.append)
-    assert value is Unknown
+    assert value == Unknown if initial_value is NoValue else initial_value
 
     # can set state from Value
     v.value = 6
