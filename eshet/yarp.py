@@ -142,3 +142,23 @@ async def action_call(
     async def cb(args_value):
         if not contains_novalue_uknonwn(args_value):
             await client.action_call(path, *args_value)
+
+
+async def set_value(
+    path,
+    value,
+    client=None,
+    strategy: TaskStrategy = RunInTask(),
+):
+    """set a state or prop whenever value does not contain NoValue/Unknown"""
+    if client is None:
+        client = await get_default_eshet_client()
+
+    value = yarp.ensure_reactive(value)
+    _keep_alive.append(value)
+
+    @yarp.utils.on_value(value)
+    @strategy.wrap_fn
+    async def cb(value_value):
+        if not contains_novalue_uknonwn(value_value):
+            await client.set(path, value_value)

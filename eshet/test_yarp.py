@@ -5,6 +5,7 @@ from .yarp import (
     state_observe,
     state_register,
     state_register_set_event,
+    set_value,
 )
 from yarp import Event, Value, NoValue
 import asyncio
@@ -223,3 +224,55 @@ async def test_action_event(client, client2):
     e.emit(5)
     await asyncio.sleep(0.5)
     assert action.mock_calls == [call(5)]
+
+
+@pytest.mark.needs_server
+async def test_set_value_no_initial(client, client2):
+    set_callback = Mock()
+    set_callback.return_value = None
+    await client.state_register("test_state5", set_callback=set_callback)
+
+    v = Value()
+    await set_value("test_state5", v, client=client2)
+    gc.collect()
+    await asyncio.sleep(0.5)
+    assert not set_callback.called
+
+    v.value = 5
+    await asyncio.sleep(0.5)
+    assert set_callback.mock_calls == [call(5)]
+
+
+@pytest.mark.needs_server
+async def test_set_value_initial(client, client2):
+    set_callback = Mock()
+    set_callback.return_value = None
+    await client.state_register("test_state6", set_callback=set_callback)
+
+    v = Value(4)
+    await set_value("test_state6", v, client=client2)
+    gc.collect()
+    await asyncio.sleep(0.5)
+    assert set_callback.mock_calls == [call(4)]
+    set_callback.reset_mock()
+
+    v.value = 5
+    await asyncio.sleep(0.5)
+    assert set_callback.mock_calls == [call(5)]
+
+
+@pytest.mark.needs_server
+async def test_set_event(client, client2):
+    set_callback = Mock()
+    set_callback.return_value = None
+    await client.state_register("test_state7", set_callback=set_callback)
+
+    e = Event()
+    await set_value("test_state7", e, client=client2)
+    gc.collect()
+    await asyncio.sleep(0.5)
+    assert not set_callback.called
+
+    e.emit(5)
+    await asyncio.sleep(0.5)
+    assert set_callback.mock_calls == [call(5)]
