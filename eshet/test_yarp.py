@@ -118,6 +118,36 @@ async def test_state_register_settable(client, client2, initial_value):
 
 
 @pytest.mark.needs_server
+@pytest.mark.parametrize("initial_value", [NoValue, 5])
+async def test_state_register_set_callback(client, client2, initial_value):
+    v = Value(initial_value)
+
+    set_values = []
+    await state_register(
+        "test_state4", v, set_callback=set_values.append, client=client2
+    )
+    gc.collect()
+
+    values = []
+    value = await client.state_observe("test_state4", values.append)
+    assert value == Unknown if initial_value is NoValue else initial_value
+
+    # can set state from Value
+    v.value = 6
+    await asyncio.sleep(0.5)
+    assert values == [6]
+
+    # can set Value from state, causing a callback
+    await client.set("test_state4", 7)
+    await asyncio.sleep(0.5)
+    # no change
+    assert v.value == 6
+    assert values == [6]
+    # event
+    assert set_values == [7]
+
+
+@pytest.mark.needs_server
 async def test_action(client, client2):
     action = Mock()
     action.return_value = None

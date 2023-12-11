@@ -56,13 +56,18 @@ async def state_observe(path, client=None):
     return output_value
 
 
-async def state_register(path, value, client=None, settable=False):
+async def state_register(path, value, client=None, settable=False, set_callback=None):
     """register a state which has the same value as `value`
 
     if settable, a set callback is registered which sets the value
 
+    alternatively, set_callback can be a callback which accepts the new value
+
     client.Unknown and yarp.NoValue are both mapped to unknown
     """
+    if settable and (set_callback is not None):
+        raise ValueError("cannot set both settable and set_callback")
+
     if client is None:
         client = await get_default_eshet_client()
     value = yarp.ensure_value(value)
@@ -70,9 +75,11 @@ async def state_register(path, value, client=None, settable=False):
 
     if settable:
 
-        def set_callback(new_value):
+        def set_value(new_value):
             value.value = new_value
 
+        state = await client.state_register(path, set_callback=set_value)
+    elif set_callback is not None:
         state = await client.state_register(path, set_callback=set_callback)
     else:
         state = await client.state_register(path)
