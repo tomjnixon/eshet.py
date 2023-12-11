@@ -97,6 +97,15 @@ async def state_register(path, value, client=None, settable=False, set_callback=
     await send(value.value)
 
 
+async def state_register_set_event(path, value, client=None):
+    """register a state as with state_register, but return an Event which emits
+    whenever the value is set
+    """
+    on_set = yarp.Event()
+    await state_register(path, value, client=client, set_callback=on_set.emit)
+    return on_set
+
+
 def contains_novalue_uknonwn(value):
     """does a value contain NoValue or Unknown somewhere?"""
     if value is yarp.NoValue:

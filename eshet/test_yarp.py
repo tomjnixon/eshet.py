@@ -1,5 +1,11 @@
 from unittest.mock import Mock, call
-from .yarp import action_call, event_listen, state_observe, state_register
+from .yarp import (
+    action_call,
+    event_listen,
+    state_observe,
+    state_register,
+    state_register_set_event,
+)
 from yarp import Event, Value, NoValue
 import asyncio
 import gc
@@ -138,6 +144,35 @@ async def test_state_register_set_callback(client, client2, initial_value):
     assert values == [6]
 
     # can set Value from state, causing a callback
+    await client.set("test_state4", 7)
+    await asyncio.sleep(0.5)
+    # no change
+    assert v.value == 6
+    assert values == [6]
+    # event
+    assert set_values == [7]
+
+
+@pytest.mark.needs_server
+@pytest.mark.parametrize("initial_value", [NoValue, 5])
+async def test_state_register_set_event(client, client2, initial_value):
+    v = Value(initial_value)
+
+    on_set = await state_register_set_event("test_state4", v, client=client2)
+    gc.collect()
+    set_values = []
+    on_set.on_event(set_values.append)
+
+    values = []
+    value = await client.state_observe("test_state4", values.append)
+    assert value == Unknown if initial_value is NoValue else initial_value
+
+    # can set state from Value
+    v.value = 6
+    await asyncio.sleep(0.5)
+    assert values == [6]
+
+    # can set Value from state, causing an event
     await client.set("test_state4", 7)
     await asyncio.sleep(0.5)
     # no change
