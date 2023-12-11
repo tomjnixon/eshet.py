@@ -1,6 +1,6 @@
 from unittest.mock import Mock, call
 from .yarp import action_call, event_listen, state_observe, state_register
-from yarp import Value, NoValue
+from yarp import Event, Value, NoValue
 import asyncio
 import gc
 import pytest
@@ -141,3 +141,20 @@ async def test_action(client, client2):
     a1.value = 7
     await asyncio.sleep(0.5)
     assert action.mock_calls == [call(5, 6), call(7, 6)]
+
+
+@pytest.mark.needs_server
+async def test_action_event(client, client2):
+    action = Mock()
+    action.return_value = None
+    await client.action_register("test_action", action)
+
+    e = Event()
+    await action_call("test_action", e, client=client2)
+    gc.collect()
+    await asyncio.sleep(0.5)
+    assert not action.called
+
+    e.emit(5)
+    await asyncio.sleep(0.5)
+    assert action.mock_calls == [call(5)]

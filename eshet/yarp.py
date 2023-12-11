@@ -1,4 +1,5 @@
 import yarp
+import yarp.utils
 from .client import Client, Unknown
 from .utils import in_task, TaskStrategy, RunInTask
 
@@ -117,13 +118,11 @@ async def action_call(
     if client is None:
         client = await get_default_eshet_client()
 
-    args = yarp.ensure_value(args)
+    args = yarp.ensure_reactive(args)
     _keep_alive.append(args)
 
-    @args.on_value_changed
+    @yarp.utils.on_value(args)
     @strategy.wrap_fn
     async def cb(args_value):
         if not contains_novalue_uknonwn(args_value):
             await client.action_call(path, *args_value)
-
-    cb(args.value)
