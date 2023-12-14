@@ -2,15 +2,17 @@ import asyncio
 import pytest
 from .utils import RunInTask, RunSerially
 from dataclasses import dataclass
+from asyncio_time_travel import TimeTravelLoop
 
 
-@pytest.fixture(scope="function")
-def event_loop():
-    from asyncio_time_travel import TimeTravelLoop
+class TimeTravelEventLoopPolicy(asyncio.DefaultEventLoopPolicy):
+    def new_event_loop(self):
+        return TimeTravelLoop()
 
-    loop = TimeTravelLoop()
-    yield loop
-    loop.close()
+
+@pytest.fixture(scope="module")
+def event_loop_policy():
+    return TimeTravelEventLoopPolicy()
 
 
 retry_opts = dict(
