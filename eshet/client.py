@@ -405,7 +405,7 @@ class Client:
         return value
 
     def __state_update(self, path, known_unknown):
-        # handle state updates for path, by resulving the future or calling
+        # handle state updates for path, by resolving the future or calling
         # callbacks
         value = to_Unknown(known_unknown)
 
