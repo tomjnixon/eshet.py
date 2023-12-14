@@ -142,6 +142,22 @@ async def test_state(client):
 
 
 @pytest.mark.needs_server
+async def test_state_unknown_with_changed(client, client2):
+    state = await client.state_register("test_state")
+    await state.changed(5)
+
+    calls = asyncio.Queue()
+    value = await client2.state_observe("test_state", calls.put_nowait)
+    assert value == 5
+
+    # set unknown with changed
+    await state.changed(Unknown)
+
+    await asyncio.sleep(0.3)
+    assert (await calls.get()) is Unknown
+
+
+@pytest.mark.needs_server
 async def test_state_observe_twice(client):
     state = await client.state_register("test_state")
     await state.changed(5)

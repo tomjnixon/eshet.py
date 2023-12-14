@@ -350,7 +350,13 @@ class Client:
         return self.StateWrapper(self, path)
 
     async def state_changed(self, path, value):
-        """update the value of a registered state"""
+        """update the value of a registered state
+
+        if value is Unknown, it is marked as unknown
+        """
+        if value is Unknown:
+            return await self.state_unknown(path)
+
         path = self.__make_absolute(path)
         self.registered_state_values[path] = value
         self.__check_connected()
