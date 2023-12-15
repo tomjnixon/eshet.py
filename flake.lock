@@ -39,16 +39,15 @@
     "yarp_src": {
       "flake": false,
       "locked": {
-        "lastModified": 1702256965,
-        "narHash": "sha256-4KHz3S39d4p+4iiWCfOf1hBRvABGZYo047PQOlYVRks=",
+        "lastModified": 1702598936,
+        "narHash": "sha256-yOI8JHPQOA9GlerBniKMUHIADHkThWriJhy/cybGoDg=",
         "owner": "tomjnixon",
         "repo": "yarp",
-        "rev": "d775de30f421ba444e939d74aa555f041ecacc98",
+        "rev": "c7c4ed739ce254d5850a1561edbf60c1e86f7084",
         "type": "github"
       },
       "original": {
         "owner": "tomjnixon",
-        "ref": "fn_value",
         "repo": "yarp",
         "type": "github"
       }
