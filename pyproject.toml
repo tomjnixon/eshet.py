@@ -25,6 +25,9 @@ dev = [
     "flake8-black",
 ]
 
+[tool.setuptools]
+packages = ["eshet"]
+
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 python_files = "*.py"
