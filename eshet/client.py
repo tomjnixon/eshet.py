@@ -33,14 +33,12 @@ def to_Unknown(known_unknown):
             return Unknown
 
 
-default_server = os.environ.get("ESHET_SERVER", "localhost")
-
 
 class Client:
     def __init__(
         self,
         base="/",
-        server=default_server,
+        server:str=None,
         client_id=None,
         timeout_cfg=TimeoutConfig(),
         logger=logging.getLogger("eshet.client"),
@@ -52,6 +50,8 @@ class Client:
         self.timeout_cfg = timeout_cfg
         self.logger = logger
 
+        if server is None:
+            server = os.environ.get("ESHET_SERVER", "localhost")
         self.host, _sep, port_s = server.partition(":")
         self.port = 11236 if port_s == "" else int(port_s)
 
