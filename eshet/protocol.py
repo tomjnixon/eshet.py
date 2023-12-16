@@ -34,12 +34,12 @@ class ProtoMessage(Enum):
 class TimeoutConfig:
     """configuration for protocol-level timeouts"""
 
-    # send a ping if we haven't sent anything for this long
+    #: send a ping if we haven't sent anything for this long
     idle_ping: int = 15
-    # tell the server to time out if it hasn't received a message for this long;
-    # must be more than idle_ping
+    #: tell the server to time out if it hasn't received a message for this long;
+    #: must be more than idle_ping
     server_timeout: int = 30
-    # how long to wait for a ping before assuming the connection is dead
+    #: how long to wait for a ping before assuming the connection is dead
     ping_timeout: int = 5
 
 

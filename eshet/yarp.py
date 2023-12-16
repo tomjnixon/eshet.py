@@ -7,12 +7,21 @@ from .utils import in_task, TaskStrategy, RunInTask
 _default_client = None
 
 
-def set_default_eshet_client(client):
+def set_default_eshet_client(client: Client):
+    """set the default (global) client used by yarp wrapper functions"""
     global _default_client
     _default_client = client
 
 
-async def get_default_eshet_client():
+async def get_default_eshet_client() -> Client:
+    """get the default (global) client used by yarp wrapper functions
+
+    If no client exists (because this has not been called by yarp functions and
+    :func:`set_default_eshet_client` has not been set, a new :class:`Client`
+    with default settings will be created.
+
+    Use this if you want to mix yarp functions with plain :class:`Client` use.
+    """
     global _default_client
     if _default_client is None:
         _default_client = Client()
@@ -25,7 +34,7 @@ async def get_default_eshet_client():
 _keep_alive = []
 
 
-async def event_listen(path, client=None):
+async def event_listen(path, client=None) -> yarp.Event:
     """make an Event which emits whenever the event at path does"""
     if client is None:
         client = await get_default_eshet_client()
@@ -35,7 +44,7 @@ async def event_listen(path, client=None):
     return event
 
 
-async def state_observe(path, client=None):
+async def state_observe(path, client=None) -> yarp.Value:
     """make a Value which has the value of the given state
 
     the value will be set by the time this returns, and will be set to
@@ -56,7 +65,7 @@ async def state_observe(path, client=None):
     return output_value
 
 
-async def state_register(path, value, client=None, settable=False, set_callback=None):
+async def state_register(path, value: yarp.Value, client=None, settable=False, set_callback=None):
     """register a state which has the same value as `value`
 
     if settable, a set callback is registered which sets the value
@@ -97,7 +106,7 @@ async def state_register(path, value, client=None, settable=False, set_callback=
     await send(value.value)
 
 
-async def state_register_set_event(path, value, client=None):
+async def state_register_set_event(path, value: yarp.Value, client=None) -> yarp.Event:
     """register a state as with state_register, but return an Event which emits
     whenever the value is set
     """
@@ -130,7 +139,14 @@ async def action_call(
     client=None,
     strategy: TaskStrategy = RunInTask(),
 ):
-    """call an action whenever args does not contain NoValue/Unknown"""
+    """call an action whenever args does not contain NoValue/Unknown
+
+    Each argument can be a :class:`yarp.Value`, :class:`yarp.Event`, or a
+    regular value. These are combined together as in :func:`yarp.fn`. If the
+    overall value is an :class:`yarp.Event`, the action will be called on every
+    emission, whereas if it's an :class:`yarp.Value` it will be called with the
+    initial and subsequent values.
+    """
     if client is None:
         client = await get_default_eshet_client()
 
@@ -146,7 +162,7 @@ async def action_call(
 
 async def set_value(
     path,
-    value,
+    value: yarp.Value | yarp.Event,
     client=None,
     strategy: TaskStrategy = RunInTask(),
 ):

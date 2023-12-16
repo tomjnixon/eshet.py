@@ -38,6 +38,10 @@ class TaskStrategy:
     """
 
     def build(self) -> typing.Callable[[Task], None]:
+        """instantiate this strategy
+
+        The return value can be called with a task to run it in the specified way.
+        """
         raise NotImplementedError()  # pragma: no cover
 
     def wrap_fn(self, f):

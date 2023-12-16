@@ -35,14 +35,28 @@ def to_Unknown(known_unknown):
 
 
 class Client:
+    """ESHET client"""
+
     def __init__(
         self,
-        base="/",
+        base:str="/",
         server:str=None,
         client_id=None,
-        timeout_cfg=TimeoutConfig(),
+        timeout_cfg:TimeoutConfig=TimeoutConfig(),
         logger=logging.getLogger("eshet.client"),
     ):
+        """
+        Parameters:
+            base: Base path for this client: relative paths passed to other
+                functions will be relative to this.
+            server: ESHET server to connect to; defaults to the `ESHET_SERVER`
+                environment variable, or localhost. This may also include the port
+                number (in the form host:port), which defaults to 11236.
+            client_id: msgpack-serialisable ID for this client; will be allocated
+                by the server if not provided
+            timeout_cfg: configuration for protocol-level timeouts
+            logger: logger for connection messages
+        """
         self.base = Path(base)
         if not self.base.is_absolute():
             raise ValueError("base path must be absolute")
@@ -335,12 +349,14 @@ class Client:
         path: str
 
         async def changed(self, value):
+            """update the value of the state; equivalent to :func:`Client.state_changed`"""
             return await self.client.state_changed(self.path, value)
 
         async def unknown(self):
+            """update the value of the state; equivalent to :func:`Client.state_unknown`"""
             return await self.client.state_unknown(self.path)
 
-    async def state_register(self, path, set_callback=None):
+    async def state_register(self, path, set_callback=None) -> StateWrapper:
         """register a state"""
         path = self.__make_absolute(path)
         self.registered_state_values[path] = Unknown
@@ -352,7 +368,7 @@ class Client:
     async def state_changed(self, path, value):
         """update the value of a registered state
 
-        if value is Unknown, it is marked as unknown
+        if value is :data:`eshet.Unknown`, it is marked as unknown
         """
         if value is Unknown:
             return await self.state_unknown(path)
