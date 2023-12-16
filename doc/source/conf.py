@@ -14,6 +14,12 @@ autodoc_member_order = "bysource"
 
 extensions.append("sphinx.ext.napoleon")
 
+extensions.append("sphinx.ext.intersphinx")
+intersphinx_mapping = {
+    "yarp": ("https://eshet.readthedocs.io/projects/yarp/en/latest", None),
+    "eshet": ("https://eshet.readthedocs.io/en/latest/", None),
+}
+
 templates_path = ["_templates"]
 exclude_patterns = []
 
