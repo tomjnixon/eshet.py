@@ -20,6 +20,10 @@ intersphinx_mapping = {
     "eshet": ("https://eshet.readthedocs.io/en/latest/", None),
 }
 
+extensions.append("myst_parser")
+
+extensions.append("sphinx.ext.autosectionlabel")
+
 templates_path = ["_templates"]
 exclude_patterns = []
 

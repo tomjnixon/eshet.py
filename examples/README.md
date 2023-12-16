@@ -1,3 +1,5 @@
+# examples
+
 Examples in this directory should have argument parsers which describe how they
 are used -- run them with `--help`.
 

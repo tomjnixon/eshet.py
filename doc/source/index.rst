@@ -2,9 +2,10 @@ eshet.py
 ========
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
    :caption: Contents:
 
+   readmes
    api
 
 Indices and tables
