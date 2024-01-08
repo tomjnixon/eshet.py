@@ -37,6 +37,17 @@
         };
       };
 
+      # latest version required for new registration method
+      packages.pytest-asyncio = python.pkgs.pytest-asyncio.overridePythonAttrs rec {
+        version = "0.23.3";
+        src = pkgs.fetchFromGitHub {
+          owner = "pytest-dev";
+          repo = "pytest-asyncio";
+          rev = "refs/tags/v${version}";
+          hash = "sha256-PTHHzVeRk5YER3Jjdim0zB60ypKU2i07z8cdx0eiStc=";
+        };
+      };
+
       packages.eshet_py = python.pkgs.buildPythonPackage rec {
         name = "eshet";
         format = "pyproject";
@@ -47,7 +58,7 @@
           sentinel
           packages.yarp
         ];
-        nativeCheckInputs = with python.pkgs; [ pytest pytest-asyncio packages.asyncio-time-travel ];
+        nativeCheckInputs = with python.pkgs; [ pytest packages.pytest-asyncio packages.asyncio-time-travel ];
         checkPhase = "pytest -m 'not needs_server'";
         pythonImportsCheck = [ "eshet" ];
       };
