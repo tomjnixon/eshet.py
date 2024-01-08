@@ -33,16 +33,15 @@ def to_Unknown(known_unknown):
             return Unknown
 
 
-
 class Client:
     """ESHET client"""
 
     def __init__(
         self,
-        base:str="/",
-        server:str=None,
+        base: str = "/",
+        server: str = None,
         client_id=None,
-        timeout_cfg:TimeoutConfig=TimeoutConfig(),
+        timeout_cfg: TimeoutConfig = TimeoutConfig(),
         logger=logging.getLogger("eshet.client"),
     ):
         """

@@ -65,7 +65,9 @@ async def state_observe(path, client=None) -> yarp.Value:
     return output_value
 
 
-async def state_register(path, value: yarp.Value, client=None, settable=False, set_callback=None):
+async def state_register(
+    path, value: yarp.Value, client=None, settable=False, set_callback=None
+):
     """register a state which has the same value as `value`
 
     if settable, a set callback is registered which sets the value
