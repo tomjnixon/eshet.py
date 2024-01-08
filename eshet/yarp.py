@@ -178,3 +178,12 @@ async def set_value(
     async def cb(value_value):
         if not contains_novalue_uknonwn(value_value):
             await client.set(path, value_value)
+
+
+@yarp.fn
+def replace_unknown(source_value, replacement_if_unknown=None):
+    """if source_value is Unknown, return replacement_if_unknown instead"""
+    if source_value is Unknown:
+        return replacement_if_unknown
+    else:
+        return source_value

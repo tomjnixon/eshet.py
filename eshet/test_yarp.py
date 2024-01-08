@@ -2,6 +2,7 @@ from unittest.mock import Mock, call
 from .yarp import (
     action_call,
     event_listen,
+    replace_unknown,
     state_observe,
     state_register,
     state_register_set_event,
@@ -276,3 +277,12 @@ async def test_set_event(client, client2):
     e.emit(5)
     await asyncio.sleep(0.5)
     assert set_callback.mock_calls == [call(5)]
+
+
+def test_replace_unknown():
+    v = Value(Unknown)
+    v_rep = replace_unknown(v, 0)
+    assert v_rep.value == 0
+
+    v.value = 5
+    assert v_rep.value == 5
