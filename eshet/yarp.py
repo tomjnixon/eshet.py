@@ -34,6 +34,16 @@ async def get_default_eshet_client() -> Client:
 _keep_alive = []
 
 
+async def event_register(path, event: yarp.Event, client=None):
+    """make an eshet event at path which emits whenever event emits"""
+    if client is None:
+        client = await get_default_eshet_client()
+
+    eshet_event = await client.event_register(path)
+    _keep_alive.append(event)
+    event.on_event(in_task(eshet_event))
+
+
 async def event_listen(path, client=None) -> yarp.Event:
     """make an Event which emits whenever the event at path does"""
     if client is None:

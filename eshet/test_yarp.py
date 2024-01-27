@@ -1,6 +1,7 @@
 from unittest.mock import Mock, call
 from .yarp import (
     action_call,
+    event_register,
     event_listen,
     replace_unknown,
     state_observe,
@@ -40,6 +41,25 @@ async def client2():
     yield c
 
     await c.close()
+
+
+@pytest.mark.needs_server
+async def test_event_register(client, client2):
+    event = Event()
+    # test keep-alive by passing temporary
+    await event_register("test_event_register", event + 1, client=client)
+    gc.collect()
+
+    events = []
+    await client2.event_listen_cb("test_event_register", events.append)
+
+    event.emit(1)
+    await asyncio.sleep(0.5)
+    assert events == [2]
+
+    event.emit(2)
+    await asyncio.sleep(0.5)
+    assert events == [2, 3]
 
 
 @pytest.mark.needs_server
