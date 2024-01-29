@@ -26,7 +26,7 @@ dev = [
 ]
 
 [tool.setuptools]
-packages = ["eshet"]
+packages = ["eshet", "eshet.misc"]
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
