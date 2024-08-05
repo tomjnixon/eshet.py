@@ -56,6 +56,17 @@
         };
 
         defaultPackage = packages.eshet_py;
+
+        devShells.eshet_py = packages.eshet_py.overridePythonAttrs (attrs: {
+          nativeBuildInputs = attrs.nativeBuildInputs ++ [
+            python.pkgs.black
+            python.pkgs.flake8
+            python.pkgs.pytest-cov
+            pkgs.nixpkgs-fmt
+          ];
+        });
+
+        devShells.default = devShells.eshet_py;
       }
     );
 }
