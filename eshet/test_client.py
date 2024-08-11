@@ -252,3 +252,7 @@ async def test_state_no_setter_error(client, client2):
 
     with pytest.raises(ErrorValue, match="not_implemented"):
         await client2.set("test_state", 7)
+
+
+def test_Unknown_bool():
+    assert not Unknown

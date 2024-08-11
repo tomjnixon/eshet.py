@@ -22,7 +22,12 @@ async def _make_awaitable(x):
 
 # for states; this is a bit easier to work with in python than the
 # '{known, X} | unknown' representation in erlang
-Unknown = sentinel.create("Unknown")
+Unknown = sentinel.create(
+    "Unknown",
+    cls_dict=dict(
+        __bool__=(lambda self: False),
+    ),
+)
 
 
 def to_Unknown(known_unknown):
