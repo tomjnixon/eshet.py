@@ -56,6 +56,7 @@ class TaskStrategy:
         return wrapper
 
 
+@dataclass(frozen=True)
 class RunInTask(TaskStrategy):
     """strategy for running tasks in separate asyncio tasks"""
 
@@ -74,7 +75,7 @@ class _RunInTaskImpl:
         pass
 
 
-@dataclass
+@dataclass(frozen=True)
 class RunSerially(TaskStrategy):
     """strategy for running tasks serially, which allows retries and queue
     jumping
