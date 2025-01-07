@@ -26,6 +26,11 @@ async def override(path, value: Value, *, validate=validate_any, client=None):
     if client is None:
         client = await get_default_eshet_client()
 
+    # can be:
+    # "off": pass-through
+    # ("forever", value): override to value
+    # ("for", start, t, value): override to value starting at start and ending
+    #   at start+t
     state = Value("off")
     await state_register(path + "/state", state, client=client)
 
@@ -42,15 +47,15 @@ async def override(path, value: Value, *, validate=validate_any, client=None):
 
     def ovr_for(time, value):
         validate(value)
-        state.value = "for", time, value
+        state.value = "for", loop.time(), time, value
 
     await client.action_register(path + "/for", ovr_for)
 
     @fn
     def get_timeout(state):
         match state:
-            case ("for", t, _):
-                return loop.time() + t
+            case ("for", start, t, _):
+                return start + t
 
     timeout = emit_at(get_timeout(state))
 
@@ -67,7 +72,7 @@ async def override(path, value: Value, *, validate=validate_any, client=None):
                 return "off"
             case ("forever", v):
                 return "override", v
-            case ("for", _, v):
+            case ("for", _, _, v):
                 return "override", v
             case _:
                 assert False
