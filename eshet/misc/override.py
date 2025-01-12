@@ -1,6 +1,7 @@
 import asyncio
 from eshet.yarp import get_default_eshet_client, state_register
 from yarp import Value, fn, no_repeat
+from yarp.store import null_store
 from yarp.temporal import emit_at
 
 
@@ -8,7 +9,9 @@ def validate_any(_value):
     pass
 
 
-async def override(path, value: Value, *, validate=validate_any, client=None):
+async def override(
+    path, value: Value, *, validate=validate_any, store_cfg=null_store, client=None
+):
     """make an ESHET interface for overriding the given input value; returns a
     new value with the override applied
 
@@ -26,13 +29,24 @@ async def override(path, value: Value, *, validate=validate_any, client=None):
     if client is None:
         client = await get_default_eshet_client()
 
-    # can be:
+    # state can be:
     # "off": pass-through
     # ("forever", value): override to value
     # ("for", start, t, value): override to value starting at start and ending
     #   at start+t
-    state = Value("off")
-    await state_register(path + "/state", state, client=client)
+
+    def validate_state(old_state):
+        match old_state:
+            case "off":
+                pass
+            case ("forever", v):
+                validate(v)
+            case ("for", float(), float(), v):
+                validate(v)
+            case _:
+                assert False
+
+    state = store_cfg.build_value("off", validate=validate_state)
 
     def clear():
         state.value = "off"
@@ -57,13 +71,24 @@ async def override(path, value: Value, *, validate=validate_any, client=None):
             case ("for", start, t, _):
                 return start + t
 
-    timeout = emit_at(get_timeout(state))
+    timeout = get_timeout(state)
 
-    @timeout.on_event
+    # XXX: make sure that a timeout that happened while this was not running is
+    # not visible to the user. this should really be handled by a callback_at
+    # function, which wouldn't have to delay the first callback to the next
+    # loop
+    if timeout.value is not None and timeout.value < loop.time():
+        state.value = "off"
+
+    timeout_event = emit_at(timeout)
+
+    @timeout_event.on_event
     def on_timeout(_):
         state.value = "off"
 
-    state.add_input(timeout)
+    state.add_input(timeout_event)
+
+    await state_register(path + "/state", state, client=client)
 
     @fn
     def clean_state(state):
