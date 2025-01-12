@@ -27,7 +27,7 @@ async def override(path, value: Value, *, validate=validate_any, client=None):
         client = await get_default_eshet_client()
 
     state = Value("off")
-    await state_register(path + "/state", state)
+    await state_register(path + "/state", state, client=client)
 
     def clear():
         state.value = "off"
