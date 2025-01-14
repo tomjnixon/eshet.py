@@ -40,11 +40,11 @@
     "yarp_src": {
       "flake": false,
       "locked": {
-        "lastModified": 1736683846,
-        "narHash": "sha256-oyzvI7vNazk6q7aFoNAgC/6mncqyA9XxQnDnbr+agvg=",
+        "lastModified": 1736857371,
+        "narHash": "sha256-gxZBWjeH837b+Bk/r6Wv0Pzgq/A9CmzmbBhpiRGpYb8=",
         "owner": "tomjnixon",
         "repo": "yarp",
-        "rev": "5201f94dd7997667181f0b0877cf5f0e46faa308",
+        "rev": "80ca687c64ca002938949856abaa21b59564d046",
         "type": "github"
       },
       "original": {
