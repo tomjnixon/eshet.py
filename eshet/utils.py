@@ -10,8 +10,8 @@ def create_task_in_set(s: set, coro):
     when it's done; returns the task
     """
     task = asyncio.create_task(coro)
-    s.add(coro)
-    task.add_done_callback(s.discard)
+    s.add(task)
+    task.add_done_callback(s.remove)
     return task
 
 
